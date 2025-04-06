@@ -307,7 +307,9 @@ __pycache__
 # PDF
 *.pdf
 
+
 # faiss_index/
 vectorDB/faiss_index/
+MCP/vector_db/
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,linux,windows,python,jupyternotebooks,dotenv,visualstudiocode,vim
