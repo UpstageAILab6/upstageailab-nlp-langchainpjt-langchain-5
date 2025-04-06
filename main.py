@@ -1,12 +1,16 @@
 # main.py
 import os
-import sys
+
+from model.model import load_chain
+from langsmith import Client
+from langchain.callbacks import tracing_v2_enabled
+from app.app import run_app
+from streamlit.runtime.scriptrunner import script_run_context as stctx
 
 def run_cli():
     """
     CLI 모드: 터미널에서 실행 시 질문을 입력받아 답변을 출력합니다.
     """
-    from model.model import load_chain
 
     pdf_path = "data/pdf/"
     if not os.path.exists(pdf_path):
@@ -19,17 +23,20 @@ def run_cli():
         question = input("질문 (종료하려면 '종료' 입력): ").strip()
         if question.lower() in ['종료', 'exit', 'quit']:
             print("프로그램을 종료합니다.")
-            break
+            break 
+        
+        with tracing_v2_enabled():
+            answer = chain.invoke(question)
 
-        answer = chain.invoke(question)
         print("답변:")
         print(answer)
+
+
 
 def run_streamlit():
     """
     Streamlit 모드: app 모듈의 run_app() 함수를 호출하여 웹 인터페이스를 실행합니다.
     """
-    from app.app import run_app
     run_app()
 
 def main():
@@ -39,7 +46,6 @@ def main():
     Streamlit 런타임 환경을 감지합니다.
     """
     try:
-        from streamlit.runtime.scriptrunner import script_run_context as stctx
         if stctx.get_script_run_ctx() is not None:
             run_streamlit()
         else:
@@ -48,11 +54,10 @@ def main():
         run_cli()
 
 
-        
+    
 
 if __name__ == "__main__":
     main()
-
 
 
 # 모듈 테스트 예시

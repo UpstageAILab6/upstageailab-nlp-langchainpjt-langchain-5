@@ -1,6 +1,9 @@
 # app/app.py
+import os
 import streamlit as st
 from model.model import load_chain
+from langchain.callbacks import tracing_v2_enabled
+from langsmith import Client
 
 def run_app():
     st.title("스포츠 룰 질의응답 시스템")
@@ -11,6 +14,9 @@ def run_app():
     question = st.text_input("궁금한 내용을 입력하세요:")
     if st.button("질문 전송") and question:
         with st.spinner("답변 생성 중..."):
-            answer = chain.invoke(question)
+            # answer = chain.invoke(question)
+            with tracing_v2_enabled():
+                answer = chain.invoke(question)
+
         st.subheader("답변")
         st.write(answer)

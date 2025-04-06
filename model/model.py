@@ -2,7 +2,7 @@
 from data.pdf_processing import pdf_load_and_split
 from embedding.embedding import initialize_embeddings
 from langchain_core.prompts import PromptTemplate
-from langchain_core.runnables import RunnablePassthrough
+from langchain_core.runnables import RunnablePassthrough, RunnableLambda
 from langchain_core.output_parsers import StrOutputParser
 
 def initialize_models():
@@ -10,6 +10,18 @@ def initialize_models():
     embedding/embedding.py의 함수를 재사용하여 LLM과 임베딩 모델을 초기화합니다.
     """
     return initialize_embeddings()
+
+
+def extract_sources(inputs):
+    """
+    리트리버가 반환한 문서에서 source metadata 추출 + context 텍스트 생성
+    """
+    docs = inputs["context"]
+    return {
+        "sources": [doc.metadata.get("source", "") for doc in docs],
+        "question": inputs["question"],
+        "context": "\n\n".join(doc.page_content for doc in docs)
+    }
 
 def load_chain(pdf_source):
     """
@@ -48,8 +60,9 @@ def load_chain(pdf_source):
     # 체인 생성
     chain = (
         {"context": retriever, "question": RunnablePassthrough()}
+        # | RunnableLambda(extract_sources)
         | prompt
         | llm
         | StrOutputParser()
     )
-    return chain
+    return chain #,retriever
