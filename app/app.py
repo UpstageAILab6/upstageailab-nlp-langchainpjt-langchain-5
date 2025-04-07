@@ -11,12 +11,21 @@ def run_app():
     pdf_source = "data/pdf/"
     chain = load_chain(pdf_source)
 
+    # 세션 상태에 대화 내역 초기화 (없을 경우)  
+    if "conversation_history" not in st.session_state:
+        st.session_state.conversation_history = []
+
     question = st.text_input("궁금한 내용을 입력하세요:")
     if st.button("질문 전송") and question:
         with st.spinner("답변 생성 중..."):
             # answer = chain.invoke(question)
+            history_str = "\n".join(st.session_state.conversation_history[-10:]) if st.session_state.conversation_history else ""
             with tracing_v2_enabled():
-                answer = chain.invoke(question)
+                answer = chain.invoke({"question": question, "history": history_str})
 
         st.subheader("답변")
-        st.write(answer)
+        # st.write(answer)
+        st.markdown(answer)
+        # 대화 내역에 현재 대화 추가
+        st.session_state.conversation_history.append("User: " + question)
+        st.session_state.conversation_history.append("Assistant: " + answer)
