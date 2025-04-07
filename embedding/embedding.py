@@ -18,7 +18,7 @@ def initialize_embeddings():
     """
     LLM과 임베딩 모델을 초기화합니다.
     """
-    model_name = "solar-mini"
+    model_name = "solar-pro"
     embedding_model = "solar-embedding-1-large-query"
     api_key = get_upstage_api_key()
 
